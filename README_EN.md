@@ -1,33 +1,33 @@
 # Kubernetes CTF Samples
 
-Kubernetes CTF（Capture The Flag）のサンプル問題集です。
+Sample challenges for Kubernetes CTF (Capture The Flag).
 
-## 環境準備
+## Environment
 
-Killercoda などの Playground サービスを使用することを推奨します。
+The following playground services are recommended:
 
 - [Killercoda](https://killercoda.com/)
 - [iximiuz Labs](https://labs.iximiuz.com/playgrounds?category=kubernetes&filter=all)
 - [KodeKloud](https://kodekloud.com/public-playgrounds)
 
-また、ローカル環境でも以下のようなツールを使用して実行できます。
+You can also run these challenges in local environments using the following tools:
 
 - [kind](https://github.com/kubernetes-sigs/kind)
 - [minikube](https://github.com/kubernetes/minikube)
 
-## 前提条件
+## Requirements
 
-- `kubectl` コマンドがインストールされている
-- Kubernetes クラスタへの管理者権限
-- 基本的な Kubernetes の知識（Pod、Service、Deployment 等）
+- `kubectl` command is installed
+- Administrator access to a Kubernetes cluster
+- Basic knowledge of Kubernetes (Pod, Service, Deployment, etc.)
 
-## ルールと注意事項
+## Rules
 
-- フラグは `CTF{...}` の形式で記載されています
-- 与えられた権限の範囲で、フラグの文字列を取得してください
-- コードを見ながら解くこともできますが、問題の難易度は下がります
+- Flags are in the format `CTF{...}`
+- Obtain the flag string within the given permission scope
+- You can solve by looking at the code, but it reduces the difficulty
 
-## 実施方法
+## Getting Started
 
 | Title | Difficulty |
 |:-----:|:---------:|
@@ -42,7 +42,7 @@ chmod +x challenge01_setup.sh
 ./challenge01_setup.sh
 ```
 
-クリーンアップ:
+Cleanup:
 
 ```bash
 kubectl delete ns ctf-1 --ignore-not-found=true
@@ -55,7 +55,7 @@ chmod +x challenge02_setup.sh
 ./challenge02_setup.sh
 ```
 
-クリーンアップ:
+Cleanup:
 
 ```bash
 kubectl delete ns ctf-2 --ignore-not-found=true
@@ -68,7 +68,7 @@ chmod +x challenge03_setup.sh
 ./challenge03_setup.sh
 ```
 
-クリーンアップ:
+Cleanup:
 
 ```bash
 kubectl delete ns ctf-3 --ignore-not-found=true
@@ -76,34 +76,34 @@ kubectl delete ns ctf-3 --ignore-not-found=true
 
 ## Tips & Tricks
 
-<details><summary>便利なコマンド一覧</summary>
+<details><summary>Useful Commands</summary>
 
 ```bash
-# 自身の持っている権限を確認
+# Check your permissions
 kubectl auth can-i --list
 
-# 特定リソースを一覧取得
+# List specific resources
 # kubectl get [resourceType]
 kubectl get po
 kubectl get deploy
 kubectl get events
 
-# リソースのマニフェスト情報を取得
+# Get resource manifest
 # kubectl get [resourceType] [resourceName] -o yaml
 kubectl get po pod01 -o yaml
 
-# 主要なリソースを一覧取得
+# List all major resources
 kubectl get all
 
-# リソースの詳細やイベント情報を取得
+# Get detailed resource information and events
 # kubectl describe [resourceType] [resourceName]
 kubectl describe po pod01
 
-# Pod に入って操作
+# Execute commands in a Pod
 # kubectl exec -it [podName] -- sh
 kubectl exec -it pod01 -- sh
 
-# ログの確認
+# Check logs
 # kubectl logs [podName]
 kubectl logs pod01
 ```
