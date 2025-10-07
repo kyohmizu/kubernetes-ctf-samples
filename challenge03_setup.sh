@@ -36,12 +36,57 @@ kubectl delete sa $CRON_SA_NAME $PLAYER_SA_NAME -n $NS --ignore-not-found=true >
 kubectl delete configmap $CONFIGMAP_NAME ${CONFIGMAP_NAME}-template -n $NS --ignore-not-found=true > /dev/null 2>&1
 kubectl delete role cron-executor-role ctf-player-role-3 -n $NS --ignore-not-found=true > /dev/null 2>&1
 kubectl delete rolebinding cron-executor-binding ctf-player-binding-3 -n $NS --ignore-not-found=true > /dev/null 2>&1
+kubectl delete networkpolicy restrict-egress-except-cronjob -n $NS --ignore-not-found=true > /dev/null 2>&1
 sleep 10 # Wait for cleanup completion
 
 # ------------------------------------
 # 2. CTF resources deployment
 # ------------------------------------
 echo "🛠️  Deploying CTF resources..."
+
+# 2-0. Create NetworkPolicy to restrict egress traffic except for CronJob pods
+K8S_API_IP=$(kubectl get endpointslice -l kubernetes.io/service-name=kubernetes -n default -o jsonpath='{.items[0].endpoints[0].addresses[0]}')
+cat <<EOF | kubectl apply -f - > /dev/null 2>&1
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: restrict-egress-except-cronjob
+  namespace: $NS
+spec:
+  podSelector:
+    matchExpressions:
+    - key: "cronjob-allowed"
+      operator: DoesNotExist
+  policyTypes:
+  - Egress
+  egress:
+  # Allow DNS resolution for all pods
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+  # Allow communication within the same namespace
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: $NS
+  # Allow communication to kube-system namespace (for DNS)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+  # Allow communication to Kubernetes API server by IP CIDR
+  - to:
+    - ipBlock:
+        cidr: $K8S_API_IP/32
+    ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 6443
+EOF
 
 # 2-1. Create Secret and ConfigMap containing the flag
 kubectl create secret generic $FLAG_SECRET_NAME \
@@ -122,6 +167,9 @@ spec:
     spec:
       ttlSecondsAfterFinished: 60 
       template:
+        metadata:
+          labels:
+            cronjob-allowed: "true"
         spec:
           serviceAccountName: $CRON_SA_NAME 
           restartPolicy: OnFailure
@@ -133,7 +181,7 @@ spec:
             - name: tools-volume
               mountPath: /tools
           containers:
-          - name: injection-target
+          - name: main-container
             image: busybox 
             command: ["/bin/sh", "-c"]
             args:
