@@ -29,7 +29,7 @@ Killercoda などの Playground サービスを使用することを推奨しま
 
 ## 実施方法
 
-| Title | Difficulty |
+| Title | Level |
 |:-----:|:---------:|
 | Challenge 01 | ⭐️ |
 | Challenge 02 | ⭐️ |

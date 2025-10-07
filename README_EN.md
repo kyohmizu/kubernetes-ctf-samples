@@ -29,7 +29,7 @@ You can also run these challenges in local environments using the following tool
 
 ## Getting Started
 
-| Title | Difficulty |
+| Title | Level |
 |:-----:|:---------:|
 | Challenge 01 | ⭐️ |
 | Challenge 02 | ⭐️ |
