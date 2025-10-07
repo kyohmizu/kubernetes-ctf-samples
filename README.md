@@ -42,11 +42,13 @@ chmod +x challenge01_setup.sh
 ./challenge01_setup.sh
 ```
 
-クリーンアップ:
+<details><summary>クリーンアップ</summary>
 
 ```bash
 kubectl delete ns ctf-1 --ignore-not-found=true
 ```
+
+</details>
 
 ### Challenge 02
 
@@ -55,11 +57,13 @@ chmod +x challenge02_setup.sh
 ./challenge02_setup.sh
 ```
 
-クリーンアップ:
+<details><summary>クリーンアップ</summary>
 
 ```bash
 kubectl delete ns ctf-2 --ignore-not-found=true
 ```
+
+</details>
 
 ### Challenge 03
 
@@ -68,11 +72,13 @@ chmod +x challenge03_setup.sh
 ./challenge03_setup.sh
 ```
 
-クリーンアップ:
+<details><summary>クリーンアップ</summary>
 
 ```bash
 kubectl delete ns ctf-3 --ignore-not-found=true
 ```
+
+</details>
 
 ## Tips & Tricks
 
