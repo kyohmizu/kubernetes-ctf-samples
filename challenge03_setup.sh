@@ -88,7 +88,7 @@ spec:
       port: 6443
 EOF
 
-# 2-1. Create Secret and ConfigMap containing the flag
+# 2-1. Create Secret containing the flag and ConfigMap
 kubectl create secret generic $FLAG_SECRET_NAME \
   --from-literal=ctf_flag_key="$FLAG_VALUE" \
   -n $NS > /dev/null 2>&1
