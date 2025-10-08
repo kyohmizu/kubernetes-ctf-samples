@@ -27,13 +27,15 @@ You can also run these challenges in local environments using the following tool
 - Obtain the flag string within the given permission scope
 - You can solve by looking at the code, but it reduces the difficulty
 
-## Getting Started
+## Challenges
 
 | Title | Level |
 |:-----:|:---------:|
 | Challenge 01 | ⭐️ |
 | Challenge 02 | ⭐️ |
 | Challenge 03 | ⭐️⭐️ |
+
+With access to a Kubernetes cluster, run the following commands:
 
 ### Challenge 01
 
