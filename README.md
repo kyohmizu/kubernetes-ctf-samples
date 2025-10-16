@@ -23,6 +23,7 @@ Killercoda などの Playground サービスを使用することを推奨しま
 
 ## ルールと注意事項
 
+- 本 CTF は、Kubernetes の基本的な知識と、`kubectl` の操作だけで解答できる問題です
 - フラグは `CTF{...}` の形式で記載されています
 - 与えられた権限の範囲で、フラグの文字列を取得してください
 - コードを見ながら解くこともできますが、問題の難易度は下がります
@@ -31,17 +32,87 @@ Killercoda などの Playground サービスを使用することを推奨しま
 
 | Title | Level |
 |:-----:|:---------:|
+| Challenge 00 (チュートリアル) | 🔰 |
 | Challenge 01 | ⭐️ |
 | Challenge 02 | ⭐️ |
 | Challenge 03 | ⭐️⭐️ |
 
 Kubernetes クラスタにアクセスできる状態で、以下のコマンドを実行してください。
 
+### Challenge 00 (チュートリアル)
+
+CTF形式と基本的なkubectlコマンドを学ぶためのチュートリアル問題です。
+
+```bash
+chmod +x challenge00_setup.sh
+./challenge00_setup.sh
+
+# kubeconfig を設定
+export KUBECONFIG=./ctf-0.kubeconfig
+```
+
+**目標**: Kubernetes クラスタのどこかに隠されているフラグを見つけてください。
+
+<details><summary>解答手順</summary>
+
+1. 最初に、何ができるかを確認します。
+
+   ```bash
+   kubectl auth can-i --list
+   ```
+
+   出力結果の中に以下の行があり、SecretリソースのList権限を持っていることがわかります。
+   ```
+   secrets                                         []                                     []               [list]
+   ```
+
+2. Namespace内のすべてのSecretを一覧表示します。
+   ```bash
+   $ kubectl get secret
+   NAME                 TYPE                                  DATA   AGE
+   ctf-player-0-token   kubernetes.io/service-account-token   3      23m
+   flag-secret          Opaque                                1      23m
+   ```
+   `flag-secret`という名前の Secret がありました。この Secret の中にフラグの文字列がありそうです。
+
+3. `flag-secret` のマニフェスト情報を取得してみます。
+   ```bash
+   $ kubectl get secret flag-secret -o yaml
+   Error from server (Forbidden): secrets "flag-secret" is forbidden: User "system:serviceaccount:ctf-0:ctf-player-0" cannot get resource "secrets" in API group "" in the namespace "ctf-0"
+   ```
+   しかし、Secret の `get` 権限がないため失敗します。
+
+4. 今度は、Secret を指定せずにマニフェスト情報を一覧取得してみます。
+
+   ```bash
+   $ kubectl get secrets -o yaml
+   ```
+   これは特定の Secret を取得しているのではなく、すべてのSecretを一覧表示しているため動作します！
+
+5. 最後に、出力の中からフラグを探してください。フラグはbase64エンコードされているので、デコードします。
+   ```bash
+   $ echo "Q1RGe1dlbGNvbWVfVG9fS3ViZXJuZXRlc19DVEZfVHV0b3JpYWx9" | base64 -d
+   CTF{Welcome_To_Kubernetes_CTF_Tutorial}
+   ```
+
+</details>
+
+<br/>
+
+チャレンジが終わったら、以下のコマンドで環境をクリーンアップします。
+
+```bash
+kubectl delete ns ctf-0 --ignore-not-found=true
+```
+
 ### Challenge 01
 
 ```bash
 chmod +x challenge01_setup.sh
 ./challenge01_setup.sh
+
+# kubeconfig を設定
+export KUBECONFIG=./ctf-1.kubeconfig
 ```
 
 <details><summary>クリーンアップ</summary>
@@ -57,6 +128,9 @@ kubectl delete ns ctf-1 --ignore-not-found=true
 ```bash
 chmod +x challenge02_setup.sh
 ./challenge02_setup.sh
+
+# kubeconfig を設定
+export KUBECONFIG=./ctf-2.kubeconfig
 ```
 
 <details><summary>クリーンアップ</summary>
@@ -72,6 +146,9 @@ kubectl delete ns ctf-2 --ignore-not-found=true
 ```bash
 chmod +x challenge03_setup.sh
 ./challenge03_setup.sh
+
+# kubeconfig を設定
+export KUBECONFIG=./ctf-3.kubeconfig
 ```
 
 <details><summary>クリーンアップ</summary>

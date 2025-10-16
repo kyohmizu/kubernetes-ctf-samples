@@ -141,6 +141,7 @@ spec:
 EOF
 
 kubectl rollout status deployment/$DEPLOYMENT_NAME -n $NS > /dev/null 2>&1
+sleep 5
 
 # ------------------------------------
 # 3. ServiceAccount and RBAC setup for CTF Player
