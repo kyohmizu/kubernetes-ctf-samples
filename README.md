@@ -55,18 +55,30 @@ export KUBECONFIG=./ctf-0.kubeconfig
 
 <details><summary>解答手順</summary>
 
-1. 最初に、何ができるかを確認します。
+1. 最初に kubeconfig を変更し、CTF用の権限でアクセスできていることを確認します。
 
    ```bash
-   kubectl auth can-i --list
+   $ kubectl auth whoami
+   ATTRIBUTE   VALUE
+   Username    system:serviceaccount:ctf-0:ctf-player-0
+   UID         16f388b9-5cbd-4059-a38a-a86e2efb9817
+   Groups      [system:serviceaccounts system:serviceaccounts:ctf-0 system:authenticated]
+   ```
+
+   ユーザー名が `ctf-player-0` と表示されていれば成功です。
+
+2. 続いて、クラスタの中で何の操作できるかを確認します。
+
+   ```bash
+   $ kubectl auth can-i --list
    ```
 
    出力結果の中に以下の行があり、SecretリソースのList権限を持っていることがわかります。
    ```
-   secrets                                         []                                     []               [list]
+   secrets                               []                           []            [list]
    ```
 
-2. Namespace内のすべてのSecretを一覧表示します。
+3. Namespace内のすべてのSecretを一覧表示します。
    ```bash
    $ kubectl get secret
    NAME                 TYPE                                  DATA   AGE
@@ -75,21 +87,21 @@ export KUBECONFIG=./ctf-0.kubeconfig
    ```
    `flag-secret`という名前の Secret がありました。この Secret の中にフラグの文字列がありそうです。
 
-3. `flag-secret` のマニフェスト情報を取得してみます。
+4. `flag-secret` のマニフェスト情報を取得してみます。
    ```bash
    $ kubectl get secret flag-secret -o yaml
    Error from server (Forbidden): secrets "flag-secret" is forbidden: User "system:serviceaccount:ctf-0:ctf-player-0" cannot get resource "secrets" in API group "" in the namespace "ctf-0"
    ```
    しかし、Secret の `get` 権限がないため失敗します。
 
-4. 今度は、Secret を指定せずにマニフェスト情報を一覧取得してみます。
+5. 今度は、Secret を指定せずにマニフェスト情報を一覧取得してみます。
 
    ```bash
    $ kubectl get secrets -o yaml
    ```
    これは特定の Secret を取得しているのではなく、すべてのSecretを一覧表示しているため動作します！
 
-5. 最後に、出力の中からフラグを探してください。フラグはbase64エンコードされているので、デコードします。
+6. 最後に、出力の中からフラグを探してください。フラグはbase64エンコードされているので、デコードします。
    ```bash
    $ echo "Q1RGe1dlbGNvbWVfVG9fS3ViZXJuZXRlc19DVEZfVHV0b3JpYWx9" | base64 -d
    CTF{Welcome_To_Kubernetes_CTF_Tutorial}

