@@ -238,7 +238,14 @@ users:
     token: $SA_TOKEN
 EOF
 
-sleep 10
+# Wait until exactly 1 pod is running
+while true; do
+    POD_COUNT=$(kubectl get pods -n $NS --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l | tr -d ' ')
+    if [ "$POD_COUNT" -eq 1 ]; then
+        break
+    fi
+    sleep 1
+done
 
 echo ""
 echo "✅ Setup completed!"

@@ -10,6 +10,8 @@ The following playground services are recommended:
 - [iximiuz Labs](https://labs.iximiuz.com/playgrounds?category=kubernetes&filter=all)
 - [KodeKloud](https://kodekloud.com/public-playgrounds)
 
+   ![](./images/killercoda.png)
+
 You can also run these challenges in local environments using the following tools:
 
 - [kind](https://github.com/kubernetes-sigs/kind)
@@ -26,7 +28,7 @@ You can also run these challenges in local environments using the following tool
 - This CTF can be solved with basic Kubernetes knowledge and `kubectl` operations only
 - Flags are in the format `CTF{...}`
 - Obtain the flag string within the given permission scope
-- You can solve by looking at the code, but it reduces the difficulty
+- You can solve by examining the source code, but this will reduce the challenge difficulty
 
 ## Challenges
 
@@ -37,7 +39,7 @@ You can also run these challenges in local environments using the following tool
 | Challenge 02 | ⭐️ |
 | Challenge 03 | ⭐️⭐️ |
 
-With access to a Kubernetes cluster, run the following commands:
+Please run the setup script for each challenge while having access to a Kubernetes cluster.
 
 ### Challenge 00 (Tutorial)
 
@@ -47,7 +49,7 @@ This is a tutorial challenge to learn CTF format and basic kubectl commands.
 chmod +x challenge00_setup.sh
 ./challenge00_setup.sh
 
-# Set kubeconfig
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-0.kubeconfig
 ```
 
@@ -113,24 +115,31 @@ export KUBECONFIG=./ctf-0.kubeconfig
 
 After completing the challenge, clean up the environment with the following command:
 
+<details><summary>Cleanup</summary>
+
 ```bash
-kubectl delete ns ctf-0 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-0 --ignore-not-found=true
 ```
+
+</details>
 
 ### Challenge 01
 
 ```bash
+# Remove CTF kubeconfig setting if it remains
+unset KUBECONFIG
+
 chmod +x challenge01_setup.sh
 ./challenge01_setup.sh
 
-# Set kubeconfig
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-1.kubeconfig
 ```
 
 <details><summary>Cleanup</summary>
 
 ```bash
-kubectl delete ns ctf-1 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-1 --ignore-not-found=true
 ```
 
 </details>
@@ -138,17 +147,20 @@ kubectl delete ns ctf-1 --ignore-not-found=true
 ### Challenge 02
 
 ```bash
+# Remove CTF kubeconfig setting if it remains
+unset KUBECONFIG
+
 chmod +x challenge02_setup.sh
 ./challenge02_setup.sh
 
-# Set kubeconfig
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-2.kubeconfig
 ```
 
 <details><summary>Cleanup</summary>
 
 ```bash
-kubectl delete ns ctf-2 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-2 --ignore-not-found=true
 ```
 
 </details>
@@ -156,24 +168,27 @@ kubectl delete ns ctf-2 --ignore-not-found=true
 ### Challenge 03
 
 ```bash
+# Remove CTF kubeconfig setting if it remains
+unset KUBECONFIG
+
 chmod +x challenge03_setup.sh
 ./challenge03_setup.sh
 
-# Set kubeconfig
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-3.kubeconfig
 ```
 
 <details><summary>Cleanup</summary>
 
 ```bash
-kubectl delete ns ctf-3 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-3 --ignore-not-found=true
 ```
 
 </details>
 
 ## Tips & Tricks
 
-<details><summary>Useful Commands</summary>
+Useful Commands:
 
 ```bash
 # Check your permissions
@@ -204,8 +219,6 @@ kubectl exec -it pod01 -- sh
 # kubectl logs [podName]
 kubectl logs pod01
 ```
-
-</details>
 
 ---
 

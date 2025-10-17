@@ -10,6 +10,8 @@ Killercoda などの Playground サービスを使用することを推奨しま
 - [iximiuz Labs](https://labs.iximiuz.com/playgrounds?category=kubernetes&filter=all)
 - [KodeKloud](https://kodekloud.com/public-playgrounds)
 
+   ![](./images/killercoda.png)
+
 また、ローカル環境でも以下のようなツールを使用して実行できます。
 
 - [kind](https://github.com/kubernetes-sigs/kind)
@@ -37,7 +39,7 @@ Killercoda などの Playground サービスを使用することを推奨しま
 | Challenge 02 | ⭐️ |
 | Challenge 03 | ⭐️⭐️ |
 
-Kubernetes クラスタにアクセスできる状態で、以下のコマンドを実行してください。
+Kubernetes クラスタにアクセスできる状態で、各チャレンジのセットアップスクリプトを実行してください。
 
 ### Challenge 00 (チュートリアル)
 
@@ -47,7 +49,7 @@ CTF形式と基本的なkubectlコマンドを学ぶためのチュートリア�
 chmod +x challenge00_setup.sh
 ./challenge00_setup.sh
 
-# kubeconfig を設定
+# CTF 用の kubeconfig を設定
 export KUBECONFIG=./ctf-0.kubeconfig
 ```
 
@@ -113,24 +115,31 @@ export KUBECONFIG=./ctf-0.kubeconfig
 
 チャレンジが終わったら、以下のコマンドで環境をクリーンアップします。
 
+<details><summary>クリーンアップ</summary>
+
 ```bash
-kubectl delete ns ctf-0 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-0 --ignore-not-found=true
 ```
+
+</details>
 
 ### Challenge 01
 
 ```bash
+# CTF 用の kubeconfig 設定が残っていれば削除
+unset KUBECONFIG
+
 chmod +x challenge01_setup.sh
 ./challenge01_setup.sh
 
-# kubeconfig を設定
+# CTF 用の kubeconfig を設定
 export KUBECONFIG=./ctf-1.kubeconfig
 ```
 
 <details><summary>クリーンアップ</summary>
 
 ```bash
-kubectl delete ns ctf-1 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-1 --ignore-not-found=true
 ```
 
 </details>
@@ -138,17 +147,20 @@ kubectl delete ns ctf-1 --ignore-not-found=true
 ### Challenge 02
 
 ```bash
+# CTF 用の kubeconfig 設定が残っていれば削除
+unset KUBECONFIG
+
 chmod +x challenge02_setup.sh
 ./challenge02_setup.sh
 
-# kubeconfig を設定
+# CTF 用の kubeconfig を設定
 export KUBECONFIG=./ctf-2.kubeconfig
 ```
 
 <details><summary>クリーンアップ</summary>
 
 ```bash
-kubectl delete ns ctf-2 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-2 --ignore-not-found=true
 ```
 
 </details>
@@ -156,24 +168,27 @@ kubectl delete ns ctf-2 --ignore-not-found=true
 ### Challenge 03
 
 ```bash
+# CTF 用の kubeconfig 設定が残っていれば削除
+unset KUBECONFIG
+
 chmod +x challenge03_setup.sh
 ./challenge03_setup.sh
 
-# kubeconfig を設定
+# CTF 用の kubeconfig を設定
 export KUBECONFIG=./ctf-3.kubeconfig
 ```
 
 <details><summary>クリーンアップ</summary>
 
 ```bash
-kubectl delete ns ctf-3 --ignore-not-found=true
+unset KUBECONFIG && kubectl delete ns ctf-3 --ignore-not-found=true
 ```
 
 </details>
 
 ## Tips & Tricks
 
-<details><summary>便利なコマンド一覧</summary>
+便利なコマンド一覧
 
 ```bash
 # 自身の持っている権限を確認
@@ -204,8 +219,6 @@ kubectl exec -it pod01 -- sh
 # kubectl logs [podName]
 kubectl logs pod01
 ```
-
-</details>
 
 ---
 
