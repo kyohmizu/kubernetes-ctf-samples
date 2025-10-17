@@ -6,7 +6,8 @@ FLAG_VALUE="CTF{ConfigMap_Env_Injection_via_Event}"
 FLAG_SECRET_NAME="flag-secret"
 CRON_SA_NAME="cron-executor-sa"
 PLAYER_SA_NAME="ctf-player-3"
-CRONJOB_NAME="flag-deployer-job"
+CRONJOB_NAME="deployment-creator-job"
+DEPLOYMENT_NAME="flag-holder"
 CONFIGMAP_NAME="deploy-config"
 KUBECONFIG_FILE="./ctf-3.kubeconfig"
 
@@ -33,7 +34,7 @@ echo "🧹 Cleaning up existing resources..."
 kubectl delete all --all -n $NS --ignore-not-found=true > /dev/null 2>&1
 kubectl delete secret $FLAG_SECRET_NAME ${PLAYER_SA_NAME}-token -n $NS --ignore-not-found=true > /dev/null 2>&1
 kubectl delete sa $CRON_SA_NAME $PLAYER_SA_NAME -n $NS --ignore-not-found=true > /dev/null 2>&1
-kubectl delete configmap $CONFIGMAP_NAME ${CONFIGMAP_NAME}-template -n $NS --ignore-not-found=true > /dev/null 2>&1
+kubectl delete configmap $CONFIGMAP_NAME ${CONFIGMAP_NAME}-template deploy-info -n $NS --ignore-not-found=true > /dev/null 2>&1
 kubectl delete role cron-executor-role ctf-player-role-3 -n $NS --ignore-not-found=true > /dev/null 2>&1
 kubectl delete rolebinding cron-executor-binding ctf-player-binding-3 -n $NS --ignore-not-found=true > /dev/null 2>&1
 kubectl delete networkpolicy restrict-egress-except-cronjob -n $NS --ignore-not-found=true > /dev/null 2>&1
@@ -97,16 +98,18 @@ DEPLOYMENT_YAML=$(cat <<EOD
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flag-holder
+  name: \${DEPLOYMENT_NAME_FROM_CRONJOB_ENV}
+  labels:
+    app: ctf-3
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: flag-holder
+      app: ctf-3
   template:
     metadata:
       labels:
-        app: flag-holder
+        app: ctf-3
     spec:
       containers:
       - name: main-container
@@ -114,7 +117,7 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
         - |
-          echo Flag is \${FLAG_ENV}
+          echo The flag is embedded as an environment variable in the CronJob: \${FLAG_FROM_CRONJOB_ENV}
           sleep 3600
         volumeMounts:
         - name: config-volume
@@ -131,6 +134,9 @@ EOD
 
 kubectl create configmap ${CONFIGMAP_NAME}-template -n $NS \
   --from-literal=deploy-template.yaml="$DEPLOYMENT_YAML" > /dev/null 2>&1
+
+kubectl create configmap deploy-info -n $NS \
+  --from-literal=deployment-name="$DEPLOYMENT_NAME" > /dev/null 2>&1
 
 # 2-2. Create RBAC for CronJob execution
 kubectl create sa $CRON_SA_NAME -n $NS > /dev/null 2>&1
@@ -193,11 +199,16 @@ spec:
               
               sleep 3
             env:
-            - name: FLAG_ENV
+            - name: FLAG_FROM_CRONJOB_ENV
               valueFrom:
                 secretKeyRef:
                   name: $FLAG_SECRET_NAME
                   key: ctf_flag_key 
+            - name: DEPLOYMENT_NAME_FROM_CRONJOB_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: deploy-info
+                  key: deployment-name
             volumeMounts:
             - name: config-vol
               mountPath: /mnt/config
