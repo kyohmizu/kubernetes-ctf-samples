@@ -25,6 +25,8 @@ Killercoda などの Playground サービスを使用することを推奨しま
 
 ## ルールと注意事項
 
+⚠️ 本 CTF は学習・教育目的で作成されています。本番環境や共有環境では実行しないでください
+
 - 本 CTF は、Kubernetes の基本的な知識と、`kubectl` の操作だけで解答できる問題です
 - フラグは `CTF{...}` の形式で記載されています
 - 与えられた権限の範囲で、フラグの文字列を取得してください
@@ -38,12 +40,14 @@ Killercoda などの Playground サービスを使用することを推奨しま
 | Challenge 01 | ⭐️ |
 | Challenge 02 | ⭐️ |
 | Challenge 03 | ⭐️⭐️ |
+| Challenge 04 | ⭐️ |
+| Challenge 05 | ⭐️ |
 
 Kubernetes クラスタにアクセスできる状態で、各チャレンジのセットアップスクリプトを実行してください。
 
 ### Challenge 00 (チュートリアル)
 
-CTF形式と基本的なkubectlコマンドを学ぶためのチュートリアル問題です。
+CTF 形式と基本的なkubectlコマンドを学ぶためのチュートリアル問題です。
 
 ```bash
 chmod +x challenge00_setup.sh
@@ -57,7 +61,7 @@ export KUBECONFIG=./ctf-0.kubeconfig
 
 <details><summary>解答手順</summary>
 
-1. 最初に kubeconfig を変更し、CTF用の権限でアクセスできていることを確認します。
+1. 最初に kubeconfig を変更し、CTF 用の権限でアクセスできていることを確認します。
 
    ```bash
    $ kubectl auth whoami
@@ -182,6 +186,48 @@ export KUBECONFIG=./ctf-3.kubeconfig
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-3 --ignore-not-found=true
+```
+
+</details>
+
+### Challenge 04
+
+```bash
+# CTF 用の kubeconfig 設定が残っていれば削除
+unset KUBECONFIG
+
+chmod +x challenge04_setup.sh
+./challenge04_setup.sh
+
+# CTF 用の kubeconfig を設定
+export KUBECONFIG=./ctf-4.kubeconfig
+```
+
+<details><summary>クリーンアップ</summary>
+
+```bash
+unset KUBECONFIG && kubectl delete ns ctf-4 --ignore-not-found=true
+```
+
+</details>
+
+### Challenge 05
+
+```bash
+# CTF 用の kubeconfig 設定が残っていれば削除
+unset KUBECONFIG
+
+chmod +x challenge05_setup.sh
+./challenge05_setup.sh
+
+# CTF 用の kubeconfig を設定
+export KUBECONFIG=./ctf-5.kubeconfig
+```
+
+<details><summary>クリーンアップ</summary>
+
+```bash
+unset KUBECONFIG && kubectl delete ns ctf-5 --ignore-not-found=true
 ```
 
 </details>

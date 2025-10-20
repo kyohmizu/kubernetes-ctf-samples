@@ -25,6 +25,8 @@ You can also run these challenges in local environments using the following tool
 
 ## Rules
 
+⚠️ This CTF is created for learning and educational purposes. Do not run it in production or shared environments.
+
 - This CTF can be solved with basic Kubernetes knowledge and `kubectl` operations only
 - Flags are in the format `CTF{...}`
 - Obtain the flag string within the given permission scope
@@ -38,6 +40,8 @@ You can also run these challenges in local environments using the following tool
 | Challenge 01 | ⭐️ |
 | Challenge 02 | ⭐️ |
 | Challenge 03 | ⭐️⭐️ |
+| Challenge 04 | ⭐️ |
+| Challenge 05 | ⭐️ |
 
 Please run the setup script for each challenge while having access to a Kubernetes cluster.
 
@@ -182,6 +186,48 @@ export KUBECONFIG=./ctf-3.kubeconfig
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-3 --ignore-not-found=true
+```
+
+</details>
+
+### Challenge 04
+
+```bash
+# Remove CTF kubeconfig setting if it remains
+unset KUBECONFIG
+
+chmod +x challenge04_setup.sh
+./challenge04_setup.sh
+
+# Set CTF kubeconfig
+export KUBECONFIG=./ctf-4.kubeconfig
+```
+
+<details><summary>Cleanup</summary>
+
+```bash
+unset KUBECONFIG && kubectl delete ns ctf-4 --ignore-not-found=true
+```
+
+</details>
+
+### Challenge 05
+
+```bash
+# Remove CTF kubeconfig setting if it remains
+unset KUBECONFIG
+
+chmod +x challenge05_setup.sh
+./challenge05_setup.sh
+
+# Set CTF kubeconfig
+export KUBECONFIG=./ctf-5.kubeconfig
+```
+
+<details><summary>Cleanup</summary>
+
+```bash
+unset KUBECONFIG && kubectl delete ns ctf-5 --ignore-not-found=true
 ```
 
 </details>

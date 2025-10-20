@@ -1,11 +1,29 @@
 #!/bin/bash
 set -e
 
-NS="ctf-0"
-SA_NAME="ctf-player-0"
-SECRET_NAME="flag-secret"
-KUBECONFIG_FILE="./ctf-0.kubeconfig"
-FLAG_VALUE="CTF{Welcome_To_Kubernetes_CTF_Tutorial}"
+# ===============================================================================
+# ⚠️  WARNING  ⚠️
+# 
+# 🇬🇧 ENGLISH:
+# DO NOT READ THIS SCRIPT BEFORE ATTEMPTING THE CHALLENGE!
+# This script contains the solution and will spoil the challenge.
+#
+# -------------------------------------------------------------------------------
+#
+# 🇯🇵 日本語:
+# チャレンジ前にこのスクリプトを読まないでください！
+# このスクリプトには解答が含まれており、CTFチャレンジのネタバレになります。
+#
+# ===============================================================================
+
+
+
+
+NS="ctf-4" 
+FLAG_VALUE="CTF{Lease_Resources_Are_Hidden_Gems}"
+LEASE_NAME="flag-is-here"
+PLAYER_SA_NAME="ctf-player-4"
+KUBECONFIG_FILE="./ctf-4.kubeconfig"
 
 # ------------------------------------
 # 0. Permission check
@@ -25,14 +43,12 @@ echo ""
 # 1. Initialization
 # ------------------------------------
 echo "🆕 Creating Namespace ($NS)..."
-
 kubectl create namespace $NS --dry-run=client -o yaml | kubectl apply -f - > /dev/null 2>&1
-
 echo "🧹 Cleaning up existing resources..."
-kubectl delete secret $SECRET_NAME ${SA_NAME}-token --ignore-not-found=true -n $NS > /dev/null 2>&1
-kubectl delete sa $SA_NAME --ignore-not-found=true -n $NS > /dev/null 2>&1
-kubectl delete role ctf-player-role-0 --ignore-not-found=true -n $NS > /dev/null 2>&1
-kubectl delete rolebinding ctf-player-binding-0 --ignore-not-found=true -n $NS > /dev/null 2>&1
+kubectl delete all --all -n $NS --ignore-not-found=true > /dev/null 2>&1
+kubectl delete sa $PLAYER_SA_NAME -n $NS --ignore-not-found=true > /dev/null 2>&1
+kubectl delete rolebinding ctf-player-admin-binding-4 -n $NS --ignore-not-found=true > /dev/null 2>&1
+kubectl delete lease $LEASE_NAME -n $NS --ignore-not-found=true > /dev/null 2>&1
 rm -f $KUBECONFIG_FILE
 sleep 5 # Wait for cleanup completion
 
@@ -41,33 +57,33 @@ sleep 5 # Wait for cleanup completion
 # ------------------------------------
 echo "🛠️  Deploying CTF resources..."
 
-# 2-1. Create Secret containing the flag
-kubectl create secret generic $SECRET_NAME \
-  --from-literal=flag="$FLAG_VALUE" \
-  -n $NS > /dev/null 2>&1
+# Create the Lease with the hidden flag
+cat <<EOF | kubectl apply -f - > /dev/null 2>&1
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata:
+  name: $LEASE_NAME
+  namespace: $NS
+  annotations:
+    description: "${FLAG_VALUE}"
+spec:
+  holderIdentity: "ctf-4"
+  leaseDurationSeconds: 3600
+EOF
+
+sleep 10
 
 # ------------------------------------
-# 3. ServiceAccount and RBAC setup
+# 3. ServiceAccount and RBAC setup for CTF Player
 # ------------------------------------
 echo "🔒 Setting up ServiceAccount and RBAC for CTF player..."
 
-kubectl create sa $SA_NAME -n $NS > /dev/null 2>&1
+kubectl create sa $PLAYER_SA_NAME -n $NS > /dev/null 2>&1
 
-cat <<EOF | kubectl apply -f - > /dev/null 2>&1
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: ctf-player-role-0
-  namespace: $NS
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["list"]
-EOF
-
-kubectl create rolebinding ctf-player-binding-0 \
-  --role=ctf-player-role-0 \
-  --serviceaccount=$NS:$SA_NAME \
+# Give the player Admin permissions within the namespace
+kubectl create rolebinding ctf-player-admin-binding-4 \
+  --clusterrole=cluster-admin \
+  --serviceaccount=$NS:$PLAYER_SA_NAME \
   --namespace=$NS > /dev/null 2>&1
 
 # ------------------------------------
@@ -75,8 +91,8 @@ kubectl create rolebinding ctf-player-binding-0 \
 # ------------------------------------
 echo "🔑 Creating Kubeconfig file..."
 
-# Create Token Secret manually for Kubernetes 1.24+
-TOKEN_SECRET_NAME="${SA_NAME}-token"
+# Get token (Create Token Secret manually for Kubernetes 1.24+)
+TOKEN_SECRET_NAME="${PLAYER_SA_NAME}-token"
 cat <<EOF | kubectl apply -f - -n $NS > /dev/null 2>&1
 apiVersion: v1
 kind: Secret
@@ -84,7 +100,7 @@ metadata:
   name: $TOKEN_SECRET_NAME
   namespace: $NS
   annotations:
-    kubernetes.io/service-account.name: $SA_NAME
+    kubernetes.io/service-account.name: $PLAYER_SA_NAME
 type: kubernetes.io/service-account-token
 EOF
 
@@ -110,36 +126,26 @@ contexts:
 - context:
     cluster: $CLUSTER_NAME
     namespace: $NS
-    user: $SA_NAME
-  name: $SA_NAME@$CLUSTER_NAME
-current-context: $SA_NAME@$CLUSTER_NAME
+    user: $PLAYER_SA_NAME
+  name: $PLAYER_SA_NAME@$CLUSTER_NAME
+current-context: $PLAYER_SA_NAME@$CLUSTER_NAME
 kind: Config
 preferences: {}
 users:
-- name: $SA_NAME
+- name: $PLAYER_SA_NAME
   user:
     token: $SA_TOKEN
 EOF
 
-sleep 10
+sleep 5
 
 echo ""
 echo "✅ Setup completed!"
 echo ""
 echo "---"
-echo "🎯 Tutorial Challenge 00"
-echo ""
-echo "Welcome to Kubernetes CTF! This is a tutorial challenge to get you started."
-echo ""
-echo "Challenge: Find the flag stored in a Kubernetes Secret."
-echo ""
 echo "You can start the CTF challenge using the following Kubeconfig file:"
 echo "$KUBECONFIG_FILE"
 echo ""
-echo "To set the environment variable:"
+echo "To set environment variable:"
 echo "export KUBECONFIG=$KUBECONFIG_FILE"
-echo ""
-echo "Commands to try:"
-echo "kubectl auth can-i --list"
-echo "kubectl get secrets"
 echo "---"
