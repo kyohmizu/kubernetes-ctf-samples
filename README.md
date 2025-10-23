@@ -1,10 +1,10 @@
 # Kubernetes CTF Samples
 
-Kubernetes CTF（Capture The Flag）のサンプル問題集です。
+Sample challenges for Kubernetes CTF (Capture The Flag).
 
-## 環境準備
+## Environment
 
-Killercoda などの Playground サービスを使用することを推奨します。
+The following playground services are recommended:
 
 - [Killercoda](https://killercoda.com/)
 - [iximiuz Labs](https://labs.iximiuz.com/playgrounds?category=kubernetes&filter=all)
@@ -12,56 +12,56 @@ Killercoda などの Playground サービスを使用することを推奨しま
 
    ![](./images/killercoda.png)
 
-また、ローカル環境でも以下のようなツールを使用して実行できます。
+You can also run these challenges in local environments using the following tools:
 
 - [kind](https://github.com/kubernetes-sigs/kind)
 - [minikube](https://github.com/kubernetes/minikube)
 
-## 前提条件
+## Requirements
 
-- `kubectl` コマンドがインストールされている
-- Kubernetes クラスタへの管理者権限
-- 基本的な Kubernetes の知識（Pod、Service、Deployment 等）
+- `kubectl` command is installed
+- Administrator access to a Kubernetes cluster
+- Basic knowledge of Kubernetes (Pod, Service, Deployment, etc.)
 
-## ルールと注意事項
+## Rules
 
-⚠️ 本 CTF は学習・教育目的で作成されています。本番環境や共有環境では実行しないでください
+⚠️ This CTF is created for learning and educational purposes. Do not run it in production or shared environments.
 
-- 本 CTF は、Kubernetes の基本的な知識と、`kubectl` の操作だけで解答できる問題です
-- フラグは `CTF{...}` の形式で記載されています
-- 与えられた権限の範囲で、フラグの文字列を取得してください
-- コードを見ながら解くこともできますが、問題の難易度は下がります
+- This CTF can be solved with basic Kubernetes knowledge and `kubectl` operations only
+- Flags are in the format `CTF{...}`
+- Obtain the flag string within the given permission scope
+- You can solve by examining the source code, but this will reduce the challenge difficulty
 
-## チャレンジ一覧
+## Challenges
 
 | Title | Level |
 |:-----:|:---------:|
-| Challenge 00 (チュートリアル) | 🔰 |
+| Challenge 00 (Tutorial) | 🔰 |
 | Challenge 01 | ⭐️ |
 | Challenge 02 | ⭐️ |
 | Challenge 03 | ⭐️⭐️ |
 | Challenge 04 | ⭐️ |
 | Challenge 05 | ⭐️ |
 
-Kubernetes クラスタにアクセスできる状態で、各チャレンジのセットアップスクリプトを実行してください。
+Please run the setup script for each challenge while having access to a Kubernetes cluster.
 
-### Challenge 00 (チュートリアル)
+### Challenge 00 (Tutorial)
 
-CTF 形式と基本的なkubectlコマンドを学ぶためのチュートリアル問題です。
+This is a tutorial challenge to learn CTF format and basic kubectl commands.
 
 ```bash
 chmod +x challenge00_setup.sh
 ./challenge00_setup.sh
 
-# CTF 用の kubeconfig を設定
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-0.kubeconfig
 ```
 
-**目標**: Kubernetes クラスタのどこかに隠されているフラグを見つけてください。
+**Objective**: Find the flag hidden somewhere in the Kubernetes cluster.
 
-<details><summary>解答手順</summary>
+<details><summary>Solution Steps</summary>
 
-1. 最初に kubeconfig を変更し、CTF 用の権限でアクセスできていることを確認します。
+1. First, change the kubeconfig and verify that you can access with CTF permissions:
 
    ```bash
    $ kubectl auth whoami
@@ -71,43 +71,43 @@ export KUBECONFIG=./ctf-0.kubeconfig
    Groups      [system:serviceaccounts system:serviceaccounts:ctf-0 system:authenticated]
    ```
 
-   ユーザー名が `ctf-player-0` と表示されていれば成功です。
+   If the username shows `ctf-player-0`, it's successful.
 
-2. 続いて、クラスタの中で何の操作できるかを確認します。
+2. Next, check what operations you can perform in the cluster:
 
    ```bash
    $ kubectl auth can-i --list
    ```
 
-   出力結果の中に以下の行があり、SecretリソースのList権限を持っていることがわかります。
+   In the output, you'll see the following line, indicating you have List permission for Secret resources:
    ```
    secrets                               []                           []            [list]
    ```
 
-3. Namespace内のすべてのSecretを一覧表示します。
+3. List all Secrets in the namespace:
    ```bash
    $ kubectl get secret
    NAME                 TYPE                                  DATA   AGE
    ctf-player-0-token   kubernetes.io/service-account-token   3      23m
    flag-secret          Opaque                                1      23m
    ```
-   `flag-secret`という名前の Secret がありました。この Secret の中にフラグの文字列がありそうです。
+   There's a Secret named `flag-secret`. The flag string is likely inside this Secret.
 
-4. `flag-secret` のマニフェスト情報を取得してみます。
+4. Try to get the manifest information of `flag-secret`:
    ```bash
    $ kubectl get secret flag-secret -o yaml
    Error from server (Forbidden): secrets "flag-secret" is forbidden: User "system:serviceaccount:ctf-0:ctf-player-0" cannot get resource "secrets" in API group "" in the namespace "ctf-0"
    ```
-   しかし、Secret の `get` 権限がないため失敗します。
+   However, this fails because you don't have `get` permission for Secrets.
 
-5. 今度は、Secret を指定せずにマニフェスト情報を一覧取得してみます。
+5. Now try to get the manifest information of all Secrets without specifying a particular one:
 
    ```bash
    $ kubectl get secrets -o yaml
    ```
-   これは特定の Secret を取得しているのではなく、すべてのSecretを一覧表示しているため動作します！
+   This works because you're listing all Secrets, not getting a specific Secret!
 
-6. 最後に、出力の中からフラグを探してください。フラグはbase64エンコードされているので、デコードします。
+6. Finally, look for the flag in the output. The flag is base64 encoded, so decode it:
    ```bash
    $ echo "Q1RGe1dlbGNvbWVfVG9fS3ViZXJuZXRlc19DVEZfVHV0b3JpYWx9" | base64 -d
    CTF{Welcome_To_Kubernetes_CTF_Tutorial}
@@ -117,9 +117,9 @@ export KUBECONFIG=./ctf-0.kubeconfig
 
 <br/>
 
-チャレンジが終わったら、以下のコマンドで環境をクリーンアップします。
+After completing the challenge, clean up the environment with the following command:
 
-<details><summary>クリーンアップ</summary>
+<details><summary>Cleanup</summary>
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-0 --ignore-not-found=true
@@ -130,17 +130,17 @@ unset KUBECONFIG && kubectl delete ns ctf-0 --ignore-not-found=true
 ### Challenge 01
 
 ```bash
-# CTF 用の kubeconfig 設定が残っていれば削除
+# Remove CTF kubeconfig setting if it remains
 unset KUBECONFIG
 
 chmod +x challenge01_setup.sh
 ./challenge01_setup.sh
 
-# CTF 用の kubeconfig を設定
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-1.kubeconfig
 ```
 
-<details><summary>クリーンアップ</summary>
+<details><summary>Cleanup</summary>
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-1 --ignore-not-found=true
@@ -151,17 +151,17 @@ unset KUBECONFIG && kubectl delete ns ctf-1 --ignore-not-found=true
 ### Challenge 02
 
 ```bash
-# CTF 用の kubeconfig 設定が残っていれば削除
+# Remove CTF kubeconfig setting if it remains
 unset KUBECONFIG
 
 chmod +x challenge02_setup.sh
 ./challenge02_setup.sh
 
-# CTF 用の kubeconfig を設定
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-2.kubeconfig
 ```
 
-<details><summary>クリーンアップ</summary>
+<details><summary>Cleanup</summary>
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-2 --ignore-not-found=true
@@ -172,17 +172,17 @@ unset KUBECONFIG && kubectl delete ns ctf-2 --ignore-not-found=true
 ### Challenge 03
 
 ```bash
-# CTF 用の kubeconfig 設定が残っていれば削除
+# Remove CTF kubeconfig setting if it remains
 unset KUBECONFIG
 
 chmod +x challenge03_setup.sh
 ./challenge03_setup.sh
 
-# CTF 用の kubeconfig を設定
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-3.kubeconfig
 ```
 
-<details><summary>クリーンアップ</summary>
+<details><summary>Cleanup</summary>
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-3 --ignore-not-found=true
@@ -193,17 +193,17 @@ unset KUBECONFIG && kubectl delete ns ctf-3 --ignore-not-found=true
 ### Challenge 04
 
 ```bash
-# CTF 用の kubeconfig 設定が残っていれば削除
+# Remove CTF kubeconfig setting if it remains
 unset KUBECONFIG
 
 chmod +x challenge04_setup.sh
 ./challenge04_setup.sh
 
-# CTF 用の kubeconfig を設定
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-4.kubeconfig
 ```
 
-<details><summary>クリーンアップ</summary>
+<details><summary>Cleanup</summary>
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-4 --ignore-not-found=true
@@ -214,17 +214,17 @@ unset KUBECONFIG && kubectl delete ns ctf-4 --ignore-not-found=true
 ### Challenge 05
 
 ```bash
-# CTF 用の kubeconfig 設定が残っていれば削除
+# Remove CTF kubeconfig setting if it remains
 unset KUBECONFIG
 
 chmod +x challenge05_setup.sh
 ./challenge05_setup.sh
 
-# CTF 用の kubeconfig を設定
+# Set CTF kubeconfig
 export KUBECONFIG=./ctf-5.kubeconfig
 ```
 
-<details><summary>クリーンアップ</summary>
+<details><summary>Cleanup</summary>
 
 ```bash
 unset KUBECONFIG && kubectl delete ns ctf-5 --ignore-not-found=true
@@ -234,34 +234,34 @@ unset KUBECONFIG && kubectl delete ns ctf-5 --ignore-not-found=true
 
 ## Tips & Tricks
 
-便利なコマンド一覧
+Useful Commands:
 
 ```bash
-# 自身の持っている権限を確認
+# Check your permissions
 kubectl auth can-i --list
 
-# 特定リソースを一覧取得
+# List specific resources
 # kubectl get [resourceType]
 kubectl get po
 kubectl get deploy
 kubectl get events
 
-# リソースのマニフェスト情報を取得
+# Get resource manifest
 # kubectl get [resourceType] [resourceName] -o yaml
 kubectl get po pod01 -o yaml
 
-# 主要なリソースを一覧取得
+# List all major resources
 kubectl get all
 
-# リソースの詳細やイベント情報を取得
+# Get detailed resource information and events
 # kubectl describe [resourceType] [resourceName]
 kubectl describe po pod01
 
-# Pod に入って操作
+# Execute commands in a Pod
 # kubectl exec -it [podName] -- sh
 kubectl exec -it pod01 -- sh
 
-# ログの確認
+# Check logs
 # kubectl logs [podName]
 kubectl logs pod01
 ```
