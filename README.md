@@ -182,6 +182,20 @@ chmod +x challenge03_setup.sh
 export KUBECONFIG=./ctf-3.kubeconfig
 ```
 
+<details><summary>Hint 1</summary>
+
+This challenge can be solved in two ways.
+
+</details>
+
+<details><summary>Hint 2</summary>
+
+Internet access from Pods is prohibited.
+
+Data exfiltration and infiltration via the internet are not allowed.
+
+</details>
+
 <details><summary>Cleanup</summary>
 
 ```bash

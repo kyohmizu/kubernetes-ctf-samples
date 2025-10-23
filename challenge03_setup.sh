@@ -180,7 +180,7 @@ spec:
           serviceAccountName: $CRON_SA_NAME 
           restartPolicy: OnFailure
           initContainers:
-          - name: kubectl-installer
+          - name: kubectl-setup
             image: busybox
             command: ["/bin/sh", "-c", "wget -O /tools/kubectl https://dl.k8s.io/release/\$(wget -qO- https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl && chmod +x /tools/kubectl"]
             volumeMounts:

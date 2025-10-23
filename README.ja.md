@@ -182,6 +182,20 @@ chmod +x challenge03_setup.sh
 export KUBECONFIG=./ctf-3.kubeconfig
 ```
 
+<details><summary>Hint 1</summary>
+
+2つの方法で解くことができます。
+
+</details>
+
+<details><summary>Hint 2</summary>
+
+Pod からインターネットアクセスは禁止されています。
+
+インターネット経由でのデータ持ち出し、持ち込みはできません。
+
+</details>
+
 <details><summary>クリーンアップ</summary>
 
 ```bash
